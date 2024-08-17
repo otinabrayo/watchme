@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from watchlist_app.models import WatchList, StreamPlatform, StreamDetail
+from watchlist_app.models import WatchList, StreamPlatform
 
 class WatchListSerializer(serializers.ModelSerializer):
     
@@ -17,13 +17,6 @@ class StreamPlatformSerializer(serializers.ModelSerializer):
         fields ="__all__" 
         
         
-class StreamDetailSerializer(serializers.ModelSerializer):
-    
-    class Meta:
-        model = StreamDetail
-        fields ="__all__"
-         
-
 # class MovieSerializer(serializers.Serializer):
 #     id = serializers.IntegerField(read_only=True)
 #     name = serializers.CharField(validators=[name_length])
