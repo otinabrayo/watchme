@@ -1,32 +1,33 @@
 from rest_framework import serializers
-from watchlist_app.models import WatchList, StreamPlatform
+from watchlist_app.models import WatchList, StreamPlatform, Review
 
-# One movie can only have 1 streaming platform
-class WatchListSerializer(serializers.ModelSerializer):
+
+class ReviewSerializer(serializers.ModelSerializer):
+        
+    class Meta:
+        model = Review
+        fields = "__all__"
     
-     class Meta:
+
+  # One movie can only have 1 streaming platform
+class WatchListSerializer(serializers.ModelSerializer):
+    reviews = ReviewSerializer(many=True, read_only=True)
+        
+    class Meta:
         model = WatchList
         fields ="__all__"
         # exclude = ['active', 'name']
 
 
 class StreamPlatformSerializer(serializers.HyperlinkedModelSerializer):    
-    
-    # A streaming platform can have many movies
-    watchlist = WatchListSerializer(many=True, read_only=True) 
-        
-    # watchlist = serializers.HyperlinkedRelatedField(
-    #     many=True, 
-    #     read_only=True, 
-    #     view_name="movie_details"
-    #     )
-    
+        # A streaming platform can have many movies
+    watchlist = WatchListSerializer(many=True, read_only=True)   
     
     class Meta:
         model = StreamPlatform
         fields ="__all__" 
         
-        
+
 # class MovieSerializer(serializers.Serializer):
 #     id = serializers.IntegerField(read_only=True)
 #     name = serializers.CharField(validators=[name_length])
