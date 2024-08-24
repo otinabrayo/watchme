@@ -18,7 +18,7 @@ class WatchListSerializer(serializers.ModelSerializer):
         # exclude = ['active', 'name']
 
 
-class StreamPlatformSerializer(serializers.HyperlinkedModelSerializer):    
+class StreamPlatformSerializer(serializers.ModelSerializer):    
         # A streaming platform can have many movies
     watchlist = WatchListSerializer(many=True, read_only=True)   
     
