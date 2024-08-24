@@ -1,6 +1,8 @@
-from rest_framework import status, mixins, generics
+from django.shortcuts import get_object_or_404
+from rest_framework import status, generics, viewsets, permissions, renderers
 from rest_framework.response import Response
 from rest_framework.views import APIView 
+from rest_framework.decorators import action
 
 from watchlist_app.api.serializers import (WatchListSerializer, StreamPlatformSerializer,
                                            ReviewSerializer)
@@ -43,21 +45,52 @@ class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
 #     def post(self, request, *args, **kwargs):
 #         return self.create(request, *args, **kwargs)
 
+class StreamPlatformVS(viewsets.ModelViewSet):
+        queryset = StreamPlatform.objects.all()
+        serializer_class = StreamPlatformSerializer
+        # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+        
+        # @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+        # def highlight(self, request, *args, **kwargs):
+        #     snippet = self.get_object()
+        #     return Response(snippet.highlighted)
 
-class StreamPlatformAV(APIView):
+        # def perform_create(self, serializer):
+        #     serializer.save(owner=self.request.user)
+
+# class StreamPlatformVS(viewsets.ViewSet):
+#     def list(self, request):
+#         queryset = StreamPlatform.objects.all()
+#         serializer = StreamPlatformSerializer(queryset, many=True, context={'request': request})
+#         return Response(serializer.data)     
+      
+#     def retrieve(self, request, pk=None):
+#         queryset = StreamPlatform.objects.all()
+#         watchList = get_object_or_404(queryset, pk=pk)
+#         serializer = StreamPlatformSerializer(watchList,  context={'request': request})
+#         return Response(serializer.data)  
+    
+#     def create(self, request):
+#         serializer = StreamPlatformSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data)
+#         return Response(serializer.errors)     
+     
+# class StreamPlatformAV(APIView):
                  
-    def get(self, request):
-        platform = StreamPlatform.objects.all()
-        serializer = StreamPlatformSerializer(platform, many=True, context={'request': request})
-        return Response(serializer.data)
+#     def get(self, request):
+#         platform = StreamPlatform.objects.all()
+#         serializer = StreamPlatformSerializer(platform, many=True, context={'request': request})
+#         return Response(serializer.data)
 
-    def post(self, request):
-        serializer = StreamPlatformSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors)
+#     def post(self, request):
+#         serializer = StreamPlatformSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data)
+#         else:
+#             return Response(serializer.errors)
         
         
 class StreamDetailAV(APIView):
