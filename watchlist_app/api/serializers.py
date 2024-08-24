@@ -1,12 +1,11 @@
 from rest_framework import serializers
 from watchlist_app.models import WatchList, StreamPlatform, Review
 
-
 class ReviewSerializer(serializers.ModelSerializer):
         
     class Meta:
         model = Review
-        fields = "__all__"
+        exclude = ('watchlist',)
     
 
   # One movie can only have 1 streaming platform
