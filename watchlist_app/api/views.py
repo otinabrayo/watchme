@@ -1,25 +1,43 @@
-from django.shortcuts import get_object_or_404
-from rest_framework import status, generics, viewsets, permissions, renderers
+from rest_framework import status, generics, viewsets
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView 
-from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 
-from watchlist_app.api.serializers import (WatchListSerializer, StreamPlatformSerializer,
-                                           ReviewSerializer)
+from watchlist_app.api.serializers import (WatchListSerializer, StreamPlatformSerializer, ReviewSerializer)
 from watchlist_app.models import WatchList, StreamPlatform, Review
 
+from watchlist_app.api.permissions import AdminOrReadOnly, ReviewUserOrReadOnly
+
 class ReviewCreate(generics.CreateAPIView):
-    serializer_class = ReviewSerializer 
+    serializer_class = ReviewSerializer
+
+    
+    def get_queryset(self):
+        return Review.objects.all()
     
     def perform_create(self, serializer):
         pk = self.kwargs.get("pk")
         movie = WatchList.objects.get(pk=pk)
+        user = self.request.user
+        user_queryset = Review.objects.filter(watchlist=movie, reviewer_user=user)
+
+        if user_queryset.exists():
+            raise ValidationError('You have already reviewed this movie.')
         
-        serializer.save(watchlist=movie)
-        
+        if movie.number_rating == 0:
+            movie.avr_rating = serializer.validated_data['rating']
+        else:
+            movie.avr_rating = (movie.avr_rating + serializer.validated_data['rating']) / 2
+        movie.number_rating = movie.number_rating +1    
+        movie.save()
+            
+        serializer.save(watchlist=movie, reviewer_user=user)
+
 class ReviewList(generics.ListAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
     def get_queryset(self):
         pk = self.kwargs['pk']
         return Review.objects.filter(watchlist = pk)
@@ -27,6 +45,7 @@ class ReviewList(generics.ListAPIView):
 class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer 
+    permission_classes = [ReviewUserOrReadOnly]
 
 # class ReviewDetail(mixins.RetrieveModelMixin, generics.GenericAPIView):
 #     queryset = Review.objects.all()
