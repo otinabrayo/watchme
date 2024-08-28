@@ -11,7 +11,6 @@ from watchlist_app.api.permissions import AdminOrReadOnly, ReviewUserOrReadOnly
 
 class ReviewCreate(generics.CreateAPIView):
     serializer_class = ReviewSerializer
-
     
     def get_queryset(self):
         return Review.objects.all()
@@ -21,7 +20,7 @@ class ReviewCreate(generics.CreateAPIView):
         movie = WatchList.objects.get(pk=pk)
         user = self.request.user
         user_queryset = Review.objects.filter(watchlist=movie, reviewer_user=user)
-
+    
         if user_queryset.exists():
             raise ValidationError('You have already reviewed this movie.')
         
@@ -37,7 +36,7 @@ class ReviewCreate(generics.CreateAPIView):
 class ReviewList(generics.ListAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticated]
     def get_queryset(self):
         pk = self.kwargs['pk']
         return Review.objects.filter(watchlist = pk)
@@ -65,17 +64,17 @@ class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
 #         return self.create(request, *args, **kwargs)
 
 class StreamPlatformVS(viewsets.ModelViewSet):
-        queryset = StreamPlatform.objects.all()
-        serializer_class = StreamPlatformSerializer
-        # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-        
-        # @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
-        # def highlight(self, request, *args, **kwargs):
-        #     snippet = self.get_object()
-        #     return Response(snippet.highlighted)
+    queryset = StreamPlatform.objects.all()
+    serializer_class = StreamPlatformSerializer
+    # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    
+    # @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    # def highlight(self, request, *args, **kwargs):
+    #     snippet = self.get_object()
+    #     return Response(snippet.highlighted)
 
-        # def perform_create(self, serializer):
-        #     serializer.save(owner=self.request.user)
+    # def perform_create(self, serializer):
+    #     serializer.save(owner=self.request.user)
 
 # class StreamPlatformVS(viewsets.ViewSet):
 #     def list(self, request):
@@ -110,8 +109,7 @@ class StreamPlatformVS(viewsets.ModelViewSet):
 #             return Response(serializer.data)
 #         else:
 #             return Response(serializer.errors)
-        
-        
+ 
 class StreamDetailAV(APIView):
     
     def get(self, request, pk):
