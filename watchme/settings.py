@@ -133,9 +133,25 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         # 'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.TokenAuthentication',
-        # or 'rest_framework_simplejwt.authentication.JWTAuthentication' if using JWT
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication'
     ],
 #     'DEFAULT_PERMISSION_CLASSES': [
 #         'rest_framework.permissions.IsAuthenticated',
 #     ],
+
+    # 'DEFAULT_THROTTLE_CLASSES': [
+    #     'rest_framework.throttling.AnonRateThrottle',
+    #     'rest_framework.throttling.UserRateThrottle'
+    # ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '5/day',
+        'user': '10/day',
+        'review_create' : '2/day',
+        'review_list' : '10/day',
+        'review_detail' : '2/day'
+    }
 }
+
+# SIMPLE_JWT = {
+#     'ROTATE_REFRESH_TOKENS' : True
+# }
