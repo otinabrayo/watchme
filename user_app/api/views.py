@@ -2,6 +2,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework import status
+# from rest_framework_simplejwt.tokens import RefreshToken
 from user_app.api.serializers import registrationSerializer
 # from user_app import models
 
@@ -28,6 +29,16 @@ def registration_view(request):
                 'token': token.key,
                 'user': serializer.data
             })
+            
+             # JWT token method
+            # refresh = RefreshToken.for_user(users)
+            # return Response({
+            #     'user': serializer.data,
+            #     'refresh': str(refresh),
+            #     'access': str(refresh.access_token),
+            # })
+            
+            
                     # ALT token method to use // it involves the data {} and models.py
             # data['response'] = "Registration Succesful"
             # data['username'] = users.username
@@ -36,6 +47,5 @@ def registration_view(request):
             # token = Token.objects.get(user=users).key
             # data['token'] = token         
             # return Response(data)
-            
         return Response(serializer.errors)
     
