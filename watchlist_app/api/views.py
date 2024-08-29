@@ -1,4 +1,4 @@
-from rest_framework import status, generics, viewsets
+from rest_framework import status, generics, viewsets, filters
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView 
@@ -11,6 +11,24 @@ from watchlist_app.api.permissions import IsAdminOrReadOnly, IsReviewUserOrReadO
 from rest_framework.throttling import UserRateThrottle, AnonRateThrottle, ScopedRateThrottle
 from watchlist_app.api.throttling import ReviewCreateThrottle, ReviewListThrottle
 
+from django_filters.rest_framework import DjangoFilterBackend
+
+class UserReview(generics.ListAPIView):
+    # queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    # permission_classes = [IsAuthenticated]
+    # throttle_classes = [ReviewListThrottle, AnonRateThrottle]
+
+# Filtering against the URL
+    # def get_queryset(self):
+    #     username = self.kwargs['username']
+    #     return Review.objects.filter(reviewer_user__username = username)
+    
+# Filtering against query parameters
+    def get_queryset(self):
+        username = self.request.query_params.get('username')
+        return Review.objects.filter(reviewer_user__username = username)
+    
 class ReviewCreate(generics.CreateAPIView):
     serializer_class = ReviewSerializer
     permission_classes = [IsAuthenticated]
@@ -38,10 +56,12 @@ class ReviewCreate(generics.CreateAPIView):
         serializer.save(watchlist=movie, reviewer_user=user)
 
 class ReviewList(generics.ListAPIView):
-    queryset = Review.objects.all()
+    # queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     throttle_classes = [ReviewListThrottle, AnonRateThrottle]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['reviewer_user__username', 'active']
 
     def get_queryset(self):
         pk = self.kwargs['pk']
@@ -145,6 +165,19 @@ class StreamDetailAV(APIView):
         detail.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)     
  
+class WatchListGV(generics.ListAPIView):
+    queryset = WatchList.objects.all()
+    serializer_class = WatchListSerializer
+    
+    # filter_backends = [DjangoFilterBackend]
+    # filterset_fields = ['title', 'platform__name']
+    
+    # filter_backends = [filters.SearchFilter]
+    # search_fields = ['title', 'platform__name']
+    
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['avr_rating']
+
         
 class WatchListAV(APIView):
     permission_classes = [IsAdminOrReadOnly]
