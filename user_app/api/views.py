@@ -28,9 +28,9 @@ def registration_view(request):
             return Response({
                 'token': token.key,
                 'user': serializer.data
-            })
+            }, status=status.HTTP_201_CREATED)
             
-             # JWT token method
+            # JWT token method
             # refresh = RefreshToken.for_user(users)
             # return Response({
             #     'user': serializer.data,
@@ -46,6 +46,6 @@ def registration_view(request):
             
             # token = Token.objects.get(user=users).key
             # data['token'] = token         
-            # return Response(data)
+            # return Response(data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors)
     
