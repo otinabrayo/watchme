@@ -6,17 +6,16 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         exclude = ('watchlist',)
-    
 
   # One movie can only have 1 streaming platform
 class WatchListSerializer(serializers.ModelSerializer):
-    reviews = ReviewSerializer(many=True, read_only=True)
+    # reviews = ReviewSerializer(many=True, read_only=True)
+    platform = serializers.CharField(source='platform.name')
         
     class Meta:
         model = WatchList
         fields ="__all__"
         # exclude = ['active', 'name']
-
 
 class StreamPlatformSerializer(serializers.ModelSerializer):    
         # A streaming platform can have many movies
@@ -26,7 +25,6 @@ class StreamPlatformSerializer(serializers.ModelSerializer):
         model = StreamPlatform
         fields ="__all__" 
         
-
 # class MovieSerializer(serializers.Serializer):
 #     id = serializers.IntegerField(read_only=True)
 #     name = serializers.CharField(validators=[name_length])
