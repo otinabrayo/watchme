@@ -1,7 +1,6 @@
 from django.contrib.auth.models import User
 from django.urls import reverse
 
-from rest_framework import status
 from rest_framework.test import APITestCase
 from rest_framework.authtoken.models import Token
 
@@ -38,3 +37,4 @@ class LoginLogoutTestCase(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
         response = self.client.post(reverse('logout'))
         self.assertEqual(response.status_code, 200)
+        

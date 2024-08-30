@@ -149,7 +149,7 @@ REST_FRAMEWORK = {
         'user': '10/day',
         'review_create' : '2/day',
         'review_list' : '10/day',
-        'review_detail' : '2/day'
+        'review_detail' : '10/day'
     },
     
     'DEFAULT_RENDERER_CLASSES': (

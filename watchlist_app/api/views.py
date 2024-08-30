@@ -6,16 +6,15 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.throttling import UserRateThrottle, AnonRateThrottle, ScopedRateThrottle
 
-from watchlist_app.api.serializers import (WatchListSerializer, StreamPlatformSerializer, ReviewSerializer)
-from watchlist_app.models import WatchList, StreamPlatform, Review
+from watchlist_app.api import serializers
+from watchlist_app import models
 from watchlist_app.api.permissions import IsAdminOrReadOnly, IsReviewUserOrReadOnly
-from watchlist_app.api.throttling import ReviewCreateThrottle, ReviewListThrottle
-from watchlist_app.api.pagination import WatchListPagination, WatchListOPagination, WatchListCPagination
-
+from watchlist_app.api import throttling
+from watchlist_app.api import pagination
 
 class UserReview(generics.ListAPIView):
     # queryset = Review.objects.all()
-    serializer_class = ReviewSerializer
+    serializer_class = serializers.ReviewSerializer
     # permission_classes = [IsAuthenticated]
     # throttle_classes = [ReviewListThrottle, AnonRateThrottle]
 
@@ -27,21 +26,21 @@ class UserReview(generics.ListAPIView):
 # Filtering against query parameters
     def get_queryset(self):
         username = self.request.query_params.get('username')
-        return Review.objects.filter(reviewer_user__username = username)
+        return models.Review.objects.filter(reviewer_user__username = username)
     
 class ReviewCreate(generics.CreateAPIView):
-    serializer_class = ReviewSerializer
+    serializer_class = serializers.ReviewSerializer
     permission_classes = [IsAuthenticated]
-    throttle_classes = [ReviewCreateThrottle]
+    throttle_classes = [throttling.ReviewCreateThrottle]
     
     def get_queryset(self):
-        return Review.objects.all()
+        return models.Review.objects.all()
     
     def perform_create(self, serializer):
         pk = self.kwargs.get("pk")
-        movie = WatchList.objects.get(pk=pk)
+        movie = models.WatchList.objects.get(pk=pk)
         user = self.request.user
-        user_queryset = Review.objects.filter(watchlist=movie, reviewer_user=user)
+        user_queryset = models.Review.objects.filter(watchlist=movie, reviewer_user=user)
     
         if user_queryset.exists():
             raise ValidationError('You have already reviewed this movie.')
@@ -57,19 +56,19 @@ class ReviewCreate(generics.CreateAPIView):
 
 class ReviewList(generics.ListAPIView):
     # queryset = Review.objects.all()
-    serializer_class = ReviewSerializer
+    serializer_class = serializers.ReviewSerializer
     # permission_classes = [IsAuthenticated]
-    throttle_classes = [ReviewListThrottle, AnonRateThrottle]
+    throttle_classes = [throttling.ReviewListThrottle, AnonRateThrottle]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['reviewer_user__username', 'active']
 
     def get_queryset(self):
         pk = self.kwargs['pk']
-        return Review.objects.filter(watchlist = pk)
+        return models.Review.objects.filter(watchlist = pk)
     
 class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Review.objects.all()
-    serializer_class = ReviewSerializer 
+    queryset = models.Review.objects.all()
+    serializer_class = serializers.ReviewSerializer 
     permission_classes = [IsReviewUserOrReadOnly]
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = 'review_detail'
@@ -93,8 +92,8 @@ class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class StreamPlatformVS(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
-    queryset = StreamPlatform.objects.all()
-    serializer_class = StreamPlatformSerializer
+    queryset = models.StreamPlatform.objects.all()
+    serializer_class = serializers.StreamPlatformSerializer
     # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     
     # @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
@@ -144,16 +143,16 @@ class StreamDetailAV(APIView):
     
     def get(self, request, pk):
         try:
-            platform = StreamPlatform.objects.get(pk=pk)
-        except StreamPlatform.DoesNotExist:
+            platform = models.StreamPlatform.objects.get(pk=pk)
+        except models.StreamPlatform.DoesNotExist:
             return Response({'error': 'Not Found'}, status=status.HTTP_404_NOT_FOUND)
         
-        serializer = StreamPlatformSerializer(platform, context={'request': request})
+        serializer = serializers.StreamPlatformSerializer(platform, context={'request': request})
         return Response(serializer.data)
     
     def put(self, request, pk):
-        platform = StreamPlatform.objects.get(pk=pk)
-        serializer = StreamPlatformSerializer(platform, data=request.data)
+        platform = models.StreamPlatform.objects.get(pk=pk)
+        serializer = serializers.StreamPlatformSerializer(platform, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data) 
@@ -161,16 +160,16 @@ class StreamDetailAV(APIView):
             return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
         
     def delete(self, request, pk):
-        detail = StreamPlatform.objects.get(pk=pk)
+        detail = models.StreamPlatform.objects.get(pk=pk)
         detail.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)     
  
 class WatchListGV(generics.ListAPIView):
-    queryset = WatchList.objects.all()
-    serializer_class = WatchListSerializer
-    pagination_class = WatchListPagination
-    pagination_class = WatchListOPagination
-    pagination_class = WatchListCPagination
+    queryset = models.WatchList.objects.all()
+    serializer_class = serializers.WatchListSerializer
+    pagination_class = pagination.WatchListPagination
+    pagination_class = pagination.WatchListOPagination
+    pagination_class = pagination.WatchListCPagination
     
     # filter_backends = [DjangoFilterBackend]
     # filterset_fields = ['title', 'platform__name']
@@ -186,12 +185,12 @@ class WatchListAV(APIView):
     permission_classes = [IsAdminOrReadOnly]
     
     def get(self, request):
-        movies = WatchList.objects.all()
-        serializer = WatchListSerializer(movies, many=True)
+        movies = models.WatchList.objects.all()
+        serializer = serializers.WatchListSerializer(movies, many=True)
         return Response(serializer.data)
     
     def post(self, request):
-        serializer = WatchListSerializer(data=request.data)
+        serializer = serializers.WatchListSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -204,16 +203,16 @@ class WatchDetailAV(APIView):
     def get(self, request, pk):
         # if request.method == 'GET':
             try:  
-                movie = WatchList.objects.get(pk=pk)
-            except WatchList.DoesNotExist:
+                movie = models.WatchList.objects.get(pk=pk)
+            except models.WatchList.DoesNotExist:
                 return Response({'error': 'Not Found'},status=status.HTTP_404_NOT_FOUND)
             
-            serializer = WatchListSerializer(movie)
+            serializer = serializers.WatchListSerializer(movie)
             return Response(serializer.data)
         
     def put(self, request, pk):
-        movie = WatchList.objects.get(pk=pk)
-        serializer = WatchListSerializer(movie, data=request.data)
+        movie = models.WatchList.objects.get(pk=pk)
+        serializer = serializers.WatchListSerializer(movie, data=request.data)
         if serializer.is_valid(): 
             serializer.save()
             return Response(serializer.data)
@@ -221,7 +220,7 @@ class WatchDetailAV(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
         
     def delete(self, request, pk):
-        movie = WatchList.objects.get(pk=pk)
+        movie = models.WatchList.objects.get(pk=pk)
         movie.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)     
     
