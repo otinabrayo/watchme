@@ -25,16 +25,16 @@ class LoginLogoutTestCase(APITestCase):
         # Create the token for the user    
         self.token = Token.objects.create(user=self.user)
         
-    # def test_1_login(self):
-    #     data = {
-    #         'username': 'example',
-    #         'password': 'pass@123'
-    #     }
-    #     response = self.client.post(reverse('login'), data)
-    #     self.assertEqual(response.status_code, 200)
+    def test_1_login(self):
+        data = {
+            'username': 'example',
+            'password': 'pass@123'
+        }
+        response = self.client.post(reverse('login'), data)
+        self.assertEqual(response.status_code, 200)
         
-    # def test_2_logout(self):
-    #     self.token = Token.objects.get(user__username='example')
-    #     self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
-    #     response = self.client.post(reverse('logout'))
-    #     self.assertEqual(response.status_code, 200)
+    def test_2_logout(self):
+        self.token = Token.objects.get(user__username='example')
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
+        response = self.client.post(reverse('logout'))
+        self.assertEqual(response.status_code, 200)
