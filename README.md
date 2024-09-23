@@ -1,4 +1,3 @@
-
 <h1>IMDB Clone API</h1>
 <p>This is an IMDB clone API built with Django and Django REST Framework, allowing users to browse, review, and rate movies, series, and other content. The API includes user authentication, content management, and throttling to provide a smooth and secure experience.</p>
 
